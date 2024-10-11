@@ -11,14 +11,15 @@ namespace GameEngine.Decorations
 {
     public class Counter : ISprite
     {
-        public int Count;
-
+        public int Count = 0;
+        
 
         public void Draw(Graphics g, Rectangle bounds)
         {
             Font countFont = new Font("Ariel", 16);
 
             g.DrawString($"Counter: {Count}", countFont, Brushes.Red,  200, 10);
+                         
         }
 
     }

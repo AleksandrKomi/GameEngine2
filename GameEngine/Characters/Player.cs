@@ -55,7 +55,7 @@ namespace GameEngine.Characters
             CurrentDirection = Direction.Left;
             _playerImage = _playerLeft;
             X -= 10;
-        }
+        } 
 
         public void MoveRight()
         {

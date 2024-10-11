@@ -3,6 +3,7 @@ using GameEngine.Decorations;
 using GameEngine.Interfeces;
 using GameEngine.Messages;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Security.Cryptography.X509Certificates;
 
@@ -16,11 +17,11 @@ namespace GameEngine
         private int _framesCount;
         private int _fps;
         private readonly Counter _counter;
-        
+
         private readonly Player _player;
         private readonly Land _land;
         private readonly List<ISprite> _sprites;
-        bool frame = false;
+        private bool _showCollizionFrame = false;
 
         // Construcor
 
@@ -30,9 +31,9 @@ namespace GameEngine
             _bufferedGraphics = BufferedGraphicsManager.Current.Allocate(CreateGraphics(), DisplayRectangle);
             _physicsUpdateTimer = new System.Timers.Timer(10);
             _physicsUpdateTimer.Elapsed += _physicsUpdateTimer_Elapsed;
-            
+
             _player = new Player("Stiv");
-            ISprite opponent  = new Opponent(50);
+            ISprite opponent = new Opponent(50, _counter);
             _land = new Land();
             _sprites = new List<ISprite>();
             _counter = new Counter();
@@ -81,10 +82,12 @@ namespace GameEngine
             }
             else if (e.KeyCode == Keys.End)
             {
-                frame = !frame;
+                _showCollizionFrame = !_showCollizionFrame;
             }
+
         }
 
+       
         private void ProcessPhysics()
         {     
             // Вызывается 100 раз в сек.
@@ -114,7 +117,7 @@ namespace GameEngine
                         if (s is ICollidable collidableSprite)
                         {
                             if (colliderSprite.X >= collidableSprite.X && colliderSprite.X <= collidableSprite.X + collidableSprite.Width && colliderSprite.Y 
-                                <= collidableSprite.Y + collidableSprite.Height)
+                                == collidableSprite.Y /*+ collidableSprite.Height*/)
                             {
                                 if (colliderSprite.IsDisappearsOnCollision)
                                    _sprites.Remove(sprite);
@@ -127,7 +130,7 @@ namespace GameEngine
                 }
             }                                        
         }
-               
+        
         protected override void OnPaint(PaintEventArgs e)
         {
             // Prepare
@@ -141,7 +144,11 @@ namespace GameEngine
 
             foreach (ISprite sprite in sprites)
             {
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 sprite.Draw(graphics, DisplayRectangle);
+                stopwatch.Stop();
+                //System.Diagnostics.Debug.WriteLine($"sprite {sprite} draw time:  {stopwatch.Elapsed.TotalMilliseconds}" );
+
 
                 // добавить логику отрисовки коллайдеров 
 
@@ -149,13 +156,13 @@ namespace GameEngine
                 {
                     Pen blackPen = new Pen(Color.Black, 1);
 
-                    if (frame == true)
+                    if (_showCollizionFrame == true)
                     {
                         graphics.DrawRectangle(blackPen, collidableSprite.X, DisplayRectangle.Bottom - collidableSprite.Y - collidableSprite.Height,
                         collidableSprite.Width, collidableSprite.Height);
                     }                  
                 }                
-            }
+            } 
                         
             // Draw FPS
 
@@ -176,7 +183,12 @@ namespace GameEngine
             // TODO: добавить обработку смерти оппонента
 
             _sprites.Remove(message.Opponent);
-            
+
+           _counter.Count++;
+
+            ISprite opponent = new Opponent(50, _counter);
+            _sprites.Add(opponent);
+
         }
 
         #region Timers

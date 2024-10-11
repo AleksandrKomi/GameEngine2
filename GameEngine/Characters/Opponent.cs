@@ -39,16 +39,19 @@ namespace GameEngine.Characters
         private Image _opponentShadow;
         private DateTime lastJump = DateTime.MinValue;
         private string text;
+        private Counter _counter;
 
-        public Opponent(int xp)
+        public Opponent(int xp, Counter Count)
         {
             // Load resources
             _xp = 50;
+            _counter = Count;
 
             _opponent = Image.FromFile("Resources/opponent.png");
             _opponentLeft = Image.FromFile("Resources/opponentLeft.png");
             _opponentShadow = Image.FromFile("Resources/opponentShadow.png");
             _opponentRight = _opponent;
+                        
         }
 
         public void Draw(Graphics g, Rectangle bounds)
@@ -71,12 +74,7 @@ namespace GameEngine.Characters
             }
 
             g.FillRectangle(redBrush, X + 15, bounds.Bottom - Y - Height - 15, widthXP, 10);
-
-            if (_xp <= 0)
-            {
-                
-            }
-
+           
         }
         
         public void ProcessPhysics()
@@ -164,7 +162,9 @@ namespace GameEngine.Characters
                 _opponentLeft = _opponentShadow;*/
 
                 MessageBus.Instantce.Publish(new OpponentDiedMessage(this));
-                
+
+              // _counter.Count++;
+                                             
             }
            
         }

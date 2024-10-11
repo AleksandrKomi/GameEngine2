@@ -133,7 +133,7 @@ namespace GameEngine.Characters
             if (_currentDirection == Direction.Left)
             {
                 Random rnd = new Random();
-                int speed = rnd.Next(1, 4);
+                int speed = rnd.Next(5);
                 _opponent = _opponentLeft;
                 X -= speed;
             }
@@ -162,12 +162,11 @@ namespace GameEngine.Characters
                 _opponentLeft = _opponentShadow;*/
 
                 MessageBus.Instantce.Publish(new OpponentDiedMessage(this));
-
-              // _counter.Count++;
-                                             
+                                                                       
             }
-           
         }
+       
+        
 
     }
 }

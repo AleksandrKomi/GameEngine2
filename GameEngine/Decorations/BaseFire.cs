@@ -29,7 +29,7 @@ namespace GameEngine.Decorations
         public bool IsDisappearsOnCollision => true;
         protected Image FireImage { get; }
         protected Direction CurrentDirection { get; set; } = Direction.Right;
-
+                
         public virtual void Draw(Graphics g, Rectangle bounds)
         {
             g.DrawImage(FireImage, X - FireSize / 2, bounds.Bottom - Y - FireSize - FireSize / 2, FireSize, FireSize);
@@ -51,7 +51,7 @@ namespace GameEngine.Decorations
                 X -= 8;
             }
         }
-        
+
 
     }
 }

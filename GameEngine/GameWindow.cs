@@ -1,5 +1,6 @@
 using GameEngine.Characters;
 using GameEngine.Decorations;
+using GameEngine.Extensions;
 using GameEngine.Interfeces;
 using GameEngine.Messages;
 using System.ComponentModel;
@@ -22,6 +23,9 @@ namespace GameEngine
         private readonly Land _land;
         private readonly List<ISprite> _sprites;
         private bool _showCollizionFrame = false;
+        private readonly Bullet _bullet;
+        private DateTime lastShot = DateTime.MinValue;
+
 
         // Construcor
 
@@ -37,10 +41,13 @@ namespace GameEngine
             _land = new Land();
             _sprites = new List<ISprite>();
             _counter = new Counter();
+            //_bullet = new Bullet(opponent);
             _sprites.Add(_player);
             _sprites.Add(opponent);
             _sprites.Add(_land);
             _sprites.Add(_counter);
+           
+            opponent.WriteDebugInfo(true);
 
             // Start timers
 
@@ -72,21 +79,29 @@ namespace GameEngine
             }
             else if (e.KeyCode == Keys.Down)
             {
-                Fire fire = new Fire(_player);
-                _sprites.Add(fire);
+                if (DateTime.Now - lastShot > TimeSpan.FromSeconds(2))
+                {
+                    Fire fire = new Fire(_player);
+                    _sprites.Add(fire);
+                    lastShot = DateTime.Now;
+                }
+                                
             }
             else if (e.KeyCode == Keys.Space)
             {
-                Ice ice = new Ice(_player);
-                _sprites.Add(ice);
+                if (DateTime.Now - lastShot > TimeSpan.FromSeconds(1))
+                {
+                    Ice ice = new Ice(_player);
+                    _sprites.Add(ice);
+                    lastShot = DateTime.Now;
+                }
+                
             }
             else if (e.KeyCode == Keys.End)
             {
                 _showCollizionFrame = !_showCollizionFrame;
             }
-
         }
-
        
         private void ProcessPhysics()
         {     

@@ -14,10 +14,13 @@ namespace GameEngine.Characters
     {
         public const int PlayerSize = 64;
         private readonly string _nickname;
+        private int _xp;
 
         public int X { get; private set; }
         public int Y { get; private set; } = 600;
         public Direction CurrentDirection = Direction.Right;
+        public int Height => PlayerSize;
+        public int Width => PlayerSize;
 
         // Resources
 
@@ -28,6 +31,7 @@ namespace GameEngine.Characters
         public Player(string nickname)
         {
             _nickname = nickname;
+            _xp = 50;
 
             // Load resources
 
@@ -42,6 +46,23 @@ namespace GameEngine.Characters
             // Draw here
             
             g.DrawImage(_playerImage, X, bounds.Bottom - Y - PlayerSize, PlayerSize, PlayerSize);
+
+            Pen blackPen = new Pen(Color.Black, 1);
+            if (_xp > 0)
+            {
+                g.DrawRectangle(blackPen, X + 15, bounds.Bottom - Y - Height - 15, 50, 10);
+            }
+
+            SolidBrush redBrush = new SolidBrush(Color.Green);
+            int widthXP = _xp;
+
+            if (_xp < 50)
+            {
+                widthXP -= 5;
+            }
+
+            g.FillRectangle(redBrush, X + 15, bounds.Bottom - Y - Height - 15, widthXP, 10);
+
         }
         
         public void ProcessPhysics()
@@ -68,7 +89,7 @@ namespace GameEngine.Characters
         {
             if (CurrentDirection == Direction.Right)
             {
-                while (Y < Land.BlockSize + 50)
+                while (Y < Land.BlockSize + 80)
                 {
                     Y += 1;
                     X += 1;
@@ -76,7 +97,7 @@ namespace GameEngine.Characters
             }
             else if (CurrentDirection == Direction.Left)
             {
-                while (Y < Land.BlockSize + 50)
+                while (Y < Land.BlockSize + 80)
                 {
                     Y += 1;
                     X -= 1;

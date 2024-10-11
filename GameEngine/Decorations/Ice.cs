@@ -23,7 +23,6 @@ namespace GameEngine.Decorations
         public override void ProcessPhysics()
         {
            base.ProcessPhysics();
-            
         }
     }
 

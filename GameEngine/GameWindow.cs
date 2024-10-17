@@ -23,9 +23,9 @@ namespace GameEngine
         private readonly Land _land;
         private readonly List<ISprite> _sprites;
         private bool _showCollizionFrame = false;
-        private readonly Bullet _bullet;
         private DateTime lastShot = DateTime.MinValue;
-
+         
+        
 
         // Construcor
 
@@ -35,19 +35,19 @@ namespace GameEngine
             _bufferedGraphics = BufferedGraphicsManager.Current.Allocate(CreateGraphics(), DisplayRectangle);
             _physicsUpdateTimer = new System.Timers.Timer(10);
             _physicsUpdateTimer.Elapsed += _physicsUpdateTimer_Elapsed;
-
-            _player = new Player("Stiv");
-            ISprite opponent = new Opponent(50, _counter);
-            _land = new Land();
             _sprites = new List<ISprite>();
+            _player = new Player("Stiv");
+            ISprite opponent = new Opponent(50, _counter, _player);
+            _land = new Land();
+            
             _counter = new Counter();
-            //_bullet = new Bullet(opponent);
             _sprites.Add(_player);
             _sprites.Add(opponent);
             _sprites.Add(_land);
             _sprites.Add(_counter);
-           
             opponent.WriteDebugInfo(true);
+
+            
 
             // Start timers
 
@@ -58,6 +58,8 @@ namespace GameEngine
             // Subscriptions
 
             MessageBus.Instantce.Subscribe<OpponentDiedMessage>(OpponentDiedMessageHandler);
+            MessageBus.Instantce.Subscribe<OpponentShootsMessage>(OpponentShootsMessageHandler);
+            
         }
 
         // Methods
@@ -84,8 +86,7 @@ namespace GameEngine
                     Fire fire = new Fire(_player);
                     _sprites.Add(fire);
                     lastShot = DateTime.Now;
-                }
-                                
+                }       
             }
             else if (e.KeyCode == Keys.Space)
             {
@@ -95,18 +96,22 @@ namespace GameEngine
                     _sprites.Add(ice);
                     lastShot = DateTime.Now;
                 }
-                
             }
             else if (e.KeyCode == Keys.End)
             {
                 _showCollizionFrame = !_showCollizionFrame;
             }
+            else if (e.KeyCode == Keys.ShiftKey)
+            {
+                
+            }
+           
         }
        
         private void ProcessPhysics()
-        {     
+        {
             // Вызывается 100 раз в сек.
-
+            
             ISprite[] sprites = _sprites.ToArray();
 
             foreach (ISprite sprite in sprites)
@@ -131,8 +136,11 @@ namespace GameEngine
                     {
                         if (s is ICollidable collidableSprite)
                         {
+                            if (collidableSprite.CanCollide(colliderSprite) == false)
+                                continue;
+
                             if (colliderSprite.X >= collidableSprite.X && colliderSprite.X <= collidableSprite.X + collidableSprite.Width && colliderSprite.Y 
-                                == collidableSprite.Y /*+ collidableSprite.Height*/)
+                                == collidableSprite.Y)
                             {
                                 if (colliderSprite.IsDisappearsOnCollision)
                                    _sprites.Remove(sprite);
@@ -140,11 +148,12 @@ namespace GameEngine
                                 collidableSprite.OnCollision(colliderSprite);
                                 System.Diagnostics.Debug.WriteLine("hit");                                
                             }
+                                                                                                                  
                         }
                     }
                 }
             }                                        
-        }
+        } 
         
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -193,6 +202,19 @@ namespace GameEngine
 
         // Handlers
 
+        private void OpponentShootsMessageHandler(OpponentShootsMessage message)
+        {
+            Random rnd = new Random();
+            int shoot = rnd.Next(10);
+
+            if (shoot < 5)
+            {
+                Bullet bullet = new Bullet(message.Opponent, _player);
+                _sprites.Add(bullet);
+            }
+            // System.Diagnostics.Debug.WriteLine("player received damage");  
+        }
+
         private void OpponentDiedMessageHandler(OpponentDiedMessage message) 
         {
             // TODO: добавить обработку смерти оппонента
@@ -201,12 +223,12 @@ namespace GameEngine
 
            _counter.Count++;
 
-            ISprite opponent = new Opponent(50, _counter);
+            ISprite opponent = new Opponent(50, _counter, _player);
             _sprites.Add(opponent);
-
+            
         }
 
-        #region Timers
+               #region Timers
 
         private void UpdateScreenTimer_Tick(object sender, EventArgs e)
         {

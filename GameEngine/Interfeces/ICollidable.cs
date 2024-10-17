@@ -15,5 +15,6 @@ namespace GameEngine.Interfeces
         int Width { get; }
 
         void OnCollision(ICollider collider);
+        bool CanCollide(ICollider collider);
     }
 }

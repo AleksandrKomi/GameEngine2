@@ -9,7 +9,5 @@ namespace GameEngine.Interfeces
     public interface ISprite
     {
         void Draw(Graphics g, Rectangle bounds);
-
-       
     }
 }

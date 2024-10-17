@@ -1,5 +1,6 @@
 ﻿using GameEngine.Decorations;
 using GameEngine.Interfeces;
+using GameEngine.Messages;
 using GameEngine.Primitives.Enums;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Characters
 {
-    public class Player : IPhysicalSprite
+    public class Player : IPhysicalSprite, ICollidable
     {
         public const int PlayerSize = 64;
         private readonly string _nickname;
@@ -27,7 +28,7 @@ namespace GameEngine.Characters
         private Image _playerImage;
         private readonly Image _playerLeft;
         private readonly Image _playerRight;
-                
+
         public Player(string nickname)
         {
             _nickname = nickname;
@@ -44,7 +45,7 @@ namespace GameEngine.Characters
         public void Draw(Graphics g, Rectangle bounds)
         {
             // Draw here
-            
+
             g.DrawImage(_playerImage, X, bounds.Bottom - Y - PlayerSize, PlayerSize, PlayerSize);
 
             Pen blackPen = new Pen(Color.Black, 1);
@@ -64,19 +65,19 @@ namespace GameEngine.Characters
             g.FillRectangle(redBrush, X + 15, bounds.Bottom - Y - Height - 15, widthXP, 10);
 
         }
-        
+
         public void ProcessPhysics()
         {
             if (Y > Land.BlockSize)
                 Y -= 5;
-        }       
- 
+        }
+
         public void MoveLeft()
         {
             CurrentDirection = Direction.Left;
             _playerImage = _playerLeft;
             X -= 10;
-        } 
+        }
 
         public void MoveRight()
         {
@@ -103,7 +104,20 @@ namespace GameEngine.Characters
                     X -= 1;
                 }
             }
-               
-        }                 
+        }
+
+        public void OnCollision(ICollider collider)
+        {
+            if (collider is Bullet)
+            {
+                _xp -= 8;
+            }
+        }
+
+        public bool CanCollide(ICollider collider)
+        {
+            return collider is Bullet;
+        }
     }
+    
 }

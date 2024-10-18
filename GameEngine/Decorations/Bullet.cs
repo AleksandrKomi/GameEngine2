@@ -67,7 +67,7 @@ namespace GameEngine.Decorations
             if (CurrentDirection == Direction.Left)
             {
                 _bulletImage = _bulletLeft;
-                X -= 6;
+                X -= 5;
 
                 if (_opponent.Y < _player.Y)
                 {
@@ -77,7 +77,7 @@ namespace GameEngine.Decorations
             else
             {
                 _bulletImage = _bulletRight;
-                X += 6;
+                X += 5;
 
                 if (_opponent.Y > _player.Y)
                 {

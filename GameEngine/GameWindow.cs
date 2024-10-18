@@ -39,16 +39,13 @@ namespace GameEngine
             _player = new Player("Stiv");
             ISprite opponent = new Opponent(50, _counter, _player);
             _land = new Land();
-            
             _counter = new Counter();
             _sprites.Add(_player);
             _sprites.Add(opponent);
             _sprites.Add(_land);
             _sprites.Add(_counter);
             opponent.WriteDebugInfo(true);
-
             
-
             // Start timers
 
             UpdateScreenTimer.Start();
@@ -58,8 +55,8 @@ namespace GameEngine
             // Subscriptions
 
             MessageBus.Instantce.Subscribe<OpponentDiedMessage>(OpponentDiedMessageHandler);
+            MessageBus.Instantce.Subscribe<PlayerDiedMessage>(PlayerDiedMessageHandler);
             MessageBus.Instantce.Subscribe<OpponentShootsMessage>(OpponentShootsMessageHandler);
-            
         }
 
         // Methods
@@ -226,6 +223,13 @@ namespace GameEngine
             ISprite opponent = new Opponent(50, _counter, _player);
             _sprites.Add(opponent);
             
+        }
+
+        private void PlayerDiedMessageHandler(PlayerDiedMessage message)
+        {
+            _sprites.Remove(message.Player);
+            System.Diagnostics.Debug.WriteLine("Game Over");
+
         }
 
                #region Timers

@@ -112,6 +112,11 @@ namespace GameEngine.Characters
             {
                 _xp -= 8;
             }
+
+            if (_xp <= 0)
+            {
+                MessageBus.Instantce.Publish(new PlayerDiedMessage(this));
+            }
         }
 
         public bool CanCollide(ICollider collider)

@@ -116,7 +116,7 @@ namespace GameEngine.Characters
                     Jump();
                     lastJump = DateTime.Now;
                                                           
-                    //Shoot();
+                    
                 }
 
                 if (DateTime.Now - lastShoot > TimeSpan.FromSeconds(2))
@@ -192,7 +192,6 @@ namespace GameEngine.Characters
             MessageBus.Instantce.Publish(new OpponentShootsMessage(this));
                         
         }
-
-        
+                
     }
 }

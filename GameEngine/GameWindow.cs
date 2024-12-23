@@ -14,18 +14,18 @@ namespace GameEngine
     {
         private readonly System.Timers.Timer _physicsUpdateTimer;
         private readonly BufferedGraphics _bufferedGraphics;
-
+   
         private int _framesCount;
         private int _fps;
-        private readonly Counter _counter;
-
-        private readonly Player _player;
-        private readonly Land _land;
+        public /*readonly*/ Counter _counter; 
+        private readonly GameOver _gameover;
+        private /*readonly*/ Player _player;
+        private /*readonly*/ Land _land;
         private readonly List<ISprite> _sprites;
         private bool _showCollizionFrame = false;
         private DateTime lastShot = DateTime.MinValue;
-         
-        
+
+
 
         // Construcor
 
@@ -36,16 +36,21 @@ namespace GameEngine
             _physicsUpdateTimer = new System.Timers.Timer(10);
             _physicsUpdateTimer.Elapsed += _physicsUpdateTimer_Elapsed;
             _sprites = new List<ISprite>();
-            _player = new Player("Stiv");
-            ISprite opponent = new Opponent(50, _counter, _player);
+
+            CreateWorld();
+
+            //_player = new Player("Stiv");
+            /*ISprite opponent = new Opponent(50, _counter, _player);
             _land = new Land();
             _counter = new Counter();
+
             _sprites.Add(_player);
             _sprites.Add(opponent);
             _sprites.Add(_land);
-            _sprites.Add(_counter);
-            opponent.WriteDebugInfo(true);
-            
+            _sprites.Add(_counter);*/
+
+            //opponent.WriteDebugInfo(true);
+
             // Start timers
 
             UpdateScreenTimer.Start();
@@ -59,11 +64,38 @@ namespace GameEngine
             MessageBus.Instantce.Subscribe<OpponentShootsMessage>(OpponentShootsMessageHandler);
         }
 
+        public void CreateWorld()
+        {
+            _sprites.Clear();
+            // _counter.Count = 0;
+            var enterNameWindow = new EnterNameWindow();
+            DialogResult result =  enterNameWindow.ShowDialog();
+
+            string playerName = result == DialogResult.OK
+                ? enterNameWindow.PlayerName
+                : "Stiv";
+
+            _player = new Player(playerName);
+            _counter = new Counter();
+            _land = new Land();
+
+            //_sprites.Add(player);
+            _sprites.Add(_player);
+            //_player._xp = 50;
+            ISprite opponent = new Opponent(50, _counter, _player);
+            _sprites.Add(opponent);
+            _sprites.Add(_land);
+            _sprites.Add(_counter);
+            
+
+        }
+
         // Methods
 
         public void GameWindow_KeyDown(object sender, KeyEventArgs e)
         {
-
+            Player player = _player;
+                       
             if (e.KeyCode == Keys.Left)
             {
                 _player.MoveLeft();
@@ -78,16 +110,16 @@ namespace GameEngine
             }
             else if (e.KeyCode == Keys.Down)
             {
-                if (DateTime.Now - lastShot > TimeSpan.FromSeconds(2))
+                if (DateTime.Now - lastShot > TimeSpan.FromSeconds(2) && _player._xp > 0)
                 {
                     Fire fire = new Fire(_player);
                     _sprites.Add(fire);
                     lastShot = DateTime.Now;
-                }       
+                }
             }
             else if (e.KeyCode == Keys.Space)
             {
-                if (DateTime.Now - lastShot > TimeSpan.FromSeconds(1))
+                if (DateTime.Now - lastShot > TimeSpan.FromSeconds(1) && _player._xp > 0)
                 {
                     Ice ice = new Ice(_player);
                     _sprites.Add(ice);
@@ -98,17 +130,17 @@ namespace GameEngine
             {
                 _showCollizionFrame = !_showCollizionFrame;
             }
-            else if (e.KeyCode == Keys.ShiftKey)
+            else if (e.KeyCode == Keys.Enter)
             {
-                
+                CreateWorld();
             }
-           
+
         }
-       
+
         private void ProcessPhysics()
         {
             // Вызывается 100 раз в сек.
-            
+
             ISprite[] sprites = _sprites.ToArray();
 
             foreach (ISprite sprite in sprites)
@@ -120,12 +152,12 @@ namespace GameEngine
 
                 if (sprite is IDisappearableSprite disappearableSprite)
                 {
-                    
+
                     if (disappearableSprite.X > 800 || disappearableSprite.X < 0)
                     {
                         _sprites.Remove(sprite);
-                    }               
-                    
+                    }
+
                 }
                 if (sprite is ICollider colliderSprite)
                 {
@@ -136,22 +168,22 @@ namespace GameEngine
                             if (collidableSprite.CanCollide(colliderSprite) == false)
                                 continue;
 
-                            if (colliderSprite.X >= collidableSprite.X && colliderSprite.X <= collidableSprite.X + collidableSprite.Width && colliderSprite.Y 
-                                == collidableSprite.Y)
+                            if (colliderSprite.X >= collidableSprite.X && colliderSprite.X <= collidableSprite.X + collidableSprite.Width &&
+                                colliderSprite.Y >= collidableSprite.Y && colliderSprite.Y <= collidableSprite.Y + collidableSprite.Height)
                             {
                                 if (colliderSprite.IsDisappearsOnCollision)
-                                   _sprites.Remove(sprite);
+                                    _sprites.Remove(sprite);
 
                                 collidableSprite.OnCollision(colliderSprite);
-                                System.Diagnostics.Debug.WriteLine("hit");                                
+                                System.Diagnostics.Debug.WriteLine("hit");
                             }
-                                                                                                                  
+
                         }
                     }
                 }
-            }                                        
-        } 
-        
+            }
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             // Prepare
@@ -181,10 +213,10 @@ namespace GameEngine
                     {
                         graphics.DrawRectangle(blackPen, collidableSprite.X, DisplayRectangle.Bottom - collidableSprite.Y - collidableSprite.Height,
                         collidableSprite.Width, collidableSprite.Height);
-                    }                  
-                }                
-            } 
-                        
+                    }
+                }
+            }
+
             // Draw FPS
 
             graphics.DrawString($"FPS: {_fps}", fpsFont, Brushes.Red, DisplayRectangle.Right - 100, 10);
@@ -204,7 +236,7 @@ namespace GameEngine
             Random rnd = new Random();
             int shoot = rnd.Next(10);
 
-            if (shoot < 5)
+            if (shoot < 4)
             {
                 Bullet bullet = new Bullet(message.Opponent, _player);
                 _sprites.Add(bullet);
@@ -212,27 +244,40 @@ namespace GameEngine
             // System.Diagnostics.Debug.WriteLine("player received damage");  
         }
 
-        private void OpponentDiedMessageHandler(OpponentDiedMessage message) 
+        private void OpponentDiedMessageHandler(OpponentDiedMessage message)
         {
             // TODO: добавить обработку смерти оппонента
 
             _sprites.Remove(message.Opponent);
 
-           _counter.Count++;
-
+            _counter.Count++;
+            
             ISprite opponent = new Opponent(50, _counter, _player);
             _sprites.Add(opponent);
-            
+
         }
 
-        private void PlayerDiedMessageHandler(PlayerDiedMessage message)
+        private async void PlayerDiedMessageHandler(PlayerDiedMessage message)
         {
             _sprites.Remove(message.Player);
-            System.Diagnostics.Debug.WriteLine("Game Over");
+            System.Diagnostics.Debug.WriteLine($"Game Over, Ваш результат: {_counter.Count}");
+                       
+            _sprites.Clear();
+            
+            GameOver gameover = new GameOver(_counter);
+            _sprites.Add(gameover);
+
+            // new EnterNameWindow(_counter.Count).ShowDialog();
+            await LeaderAPI.PostLeader(_player.Nickname, _counter.Count);
+            new LeaderBoard().ShowDialog();
+                
+
+            // _sprites.Remove(_counter);
 
         }
 
-               #region Timers
+        
+        #region Timers
 
         private void UpdateScreenTimer_Tick(object sender, EventArgs e)
         {

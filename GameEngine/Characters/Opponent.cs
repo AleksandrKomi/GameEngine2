@@ -36,7 +36,6 @@ namespace GameEngine.Characters
         private Image _opponent;
         private Image _opponentLeft;
         private Image _opponentRight;
-        //private Image _opponentShadow;
         private DateTime lastJump = DateTime.MinValue;
         private DateTime lastShoot = DateTime.MinValue;
         private string text;
@@ -52,7 +51,7 @@ namespace GameEngine.Characters
             _xp = 50;
             _counter = count;
             _player = player;
-            //_sprites = sprites;
+            
 
             _opponent = Image.FromFile("Resources/opponent.png");
             _opponentLeft = Image.FromFile("Resources/opponentLeft.png");
@@ -119,7 +118,7 @@ namespace GameEngine.Characters
                     
                 }
 
-                if (DateTime.Now - lastShoot > TimeSpan.FromSeconds(2))
+                if (DateTime.Now - lastShoot > TimeSpan.FromSeconds(3))
                 {
                     Shoot();
                     lastShoot = DateTime.Now;
@@ -164,7 +163,7 @@ namespace GameEngine.Characters
             
             if (collider is Fire)
             {
-                _xp -= 10;
+                _xp -= 12;
             }
             else if (collider is Ice)
             {

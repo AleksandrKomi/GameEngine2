@@ -34,10 +34,6 @@ namespace GameEngine.Decorations
             X = opponent.X;
             Y = opponent.Y;
            
-
-            /*int currentLocationPlayer = player.X;
-            int currentLocationOpponent = opponent.X;*/
-
             if (player.X  < opponent.X)
             {
                 CurrentDirection = Direction.Left;
@@ -53,7 +49,8 @@ namespace GameEngine.Decorations
                             
         public void Draw(Graphics g, Rectangle bounds)
         {
-            g.DrawImage(_bulletImage, X - BulletSize / 2, bounds.Bottom - Y - BulletSize - BulletSize / 2, BulletSize, BulletSize);
+            g.DrawImage(_bulletImage, X - BulletSize / 2, bounds.Bottom - Y - BulletSize, BulletSize, BulletSize);
+            //g.FillEllipse(Brushes.Red, X - 6 / 2, bounds.Bottom - Y - 6 - 6 / 2, 6, 6);
         }
 
         public void ProcessPhysics()
@@ -67,7 +64,7 @@ namespace GameEngine.Decorations
             if (CurrentDirection == Direction.Left)
             {
                 _bulletImage = _bulletLeft;
-                X -= 5;
+                X -= 4;
 
                 if (_opponent.Y < _player.Y)
                 {
@@ -77,7 +74,7 @@ namespace GameEngine.Decorations
             else
             {
                 _bulletImage = _bulletRight;
-                X += 5;
+                X += 4;
 
                 if (_opponent.Y > _player.Y)
                 {

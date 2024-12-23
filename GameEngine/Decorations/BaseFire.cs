@@ -50,8 +50,8 @@ namespace GameEngine.Decorations
             {
                 X -= 8;
             }
+            
         }
-
 
     }
 }

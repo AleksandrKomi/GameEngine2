@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -19,7 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Leaf.xNet" Version="5.2.10" />
     <PackageReference Include="Redbus" Version="1.0.8" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

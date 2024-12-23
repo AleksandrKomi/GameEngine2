@@ -14,15 +14,15 @@ namespace GameEngine.Characters
     public class Player : IPhysicalSprite, ICollidable
     {
         public const int PlayerSize = 64;
-        private readonly string _nickname;
-        private int _xp;
+        public readonly string Nickname;
+        public int _xp;
 
         public int X { get; private set; }
         public int Y { get; private set; } = 600;
         public Direction CurrentDirection = Direction.Right;
         public int Height => PlayerSize;
         public int Width => PlayerSize;
-
+        
         // Resources
 
         private Image _playerImage;
@@ -31,7 +31,7 @@ namespace GameEngine.Characters
 
         public Player(string nickname)
         {
-            _nickname = nickname;
+            Nickname = nickname;
             _xp = 50;
 
             // Load resources
@@ -39,7 +39,12 @@ namespace GameEngine.Characters
             _playerImage = Image.FromFile("Resources/player.png");
             _playerLeft = Image.FromFile("Resources/playerLeft.png");
             _playerRight = _playerImage;
+            
+        }
 
+        public void Name(string nickname) 
+        {
+            nickname = "user"; 
         }
 
         public void Draw(Graphics g, Rectangle bounds)
@@ -56,6 +61,7 @@ namespace GameEngine.Characters
 
             SolidBrush redBrush = new SolidBrush(Color.Green);
             int widthXP = _xp;
+            //string name = Nickname;
 
             if (_xp < 50)
             {
@@ -63,6 +69,13 @@ namespace GameEngine.Characters
             }
 
             g.FillRectangle(redBrush, X + 15, bounds.Bottom - Y - Height - 15, widthXP, 10);
+
+            //NickName
+
+            Font nick = new Font("Ariel", 15);           
+            string name = Nickname;
+            g.DrawString($"Ваш ник: {name}", nick, Brushes.Indigo, PlayerSize + 10 , PlayerSize + 10);
+       
 
         }
 
@@ -90,7 +103,7 @@ namespace GameEngine.Characters
         {
             if (CurrentDirection == Direction.Right)
             {
-                while (Y < Land.BlockSize + 80)
+                while (Y < Land.BlockSize + 90)
                 {
                     Y += 1;
                     X += 1;
@@ -98,7 +111,7 @@ namespace GameEngine.Characters
             }
             else if (CurrentDirection == Direction.Left)
             {
-                while (Y < Land.BlockSize + 80)
+                while (Y < Land.BlockSize + 90)
                 {
                     Y += 1;
                     X -= 1;

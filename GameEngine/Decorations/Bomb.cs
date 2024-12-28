@@ -10,31 +10,30 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Decorations
 {
-    public class Bullet : BaseFire
+    public class Bomb : BaseFire
     {
-            
         private readonly IPositionable _shooter;
         private readonly IPositionable _target;
         private readonly Direction _direction;
 
-        protected override int FireSize => 30;
+        protected override int FireSize => 40;
 
-        public Bullet(IPositionable shooter, IPositionable target) : base(shooter,
-           texturePath: target.X < shooter.X ? "Resources/bulletLeft.png" : "Resources/bullet.png")
+        public Bomb(IPositionable shooter, IPositionable target) : base(shooter,
+           texturePath: target.X < shooter.X ? "Resources/Bomb.png" : "Resources/BombRight.png")
         {
            _shooter = shooter;
             _target = target;
-            _direction = target.X < shooter.X 
-                ? Direction.Left 
-                : Direction.Right;
-        }                 
+            _direction = target.X < shooter.X
+               ? Direction.Left
+               : Direction.Right;
+        }              
        
         public override void ProcessPhysics()
         {
-            PhysicsBullet();
+            PhysicsBomb();
         }
 
-        public void PhysicsBullet()
+        public void PhysicsBomb()
         {
 
             if (_direction == Direction.Left)  
@@ -43,7 +42,7 @@ namespace GameEngine.Decorations
             }
             else
             {
-                X += 4;             
+                X += 4;
             }
 
             if (_shooter.Y < _target.Y)

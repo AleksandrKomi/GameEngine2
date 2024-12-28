@@ -1,4 +1,5 @@
 ﻿using GameEngine.Characters;
+using GameEngine.Interfeces;
 using Redbus.Events;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,10 @@ namespace GameEngine.Messages
     public class OpponentShootsMessage : EventBase
     {
         // Nothing here
-        public OpponentShootsMessage(Opponent opponent)
+        public OpponentShootsMessage(IPositionable opponent )
         {
             Opponent = opponent;
-            
         }
-        public Opponent Opponent { get; }
+        public IPositionable Opponent { get; }
     }
 }

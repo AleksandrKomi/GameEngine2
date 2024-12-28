@@ -12,15 +12,15 @@ namespace GameEngine.Decorations
     public abstract class BaseFire : IPhysicalSprite, IDisappearableSprite, ICollider
     {               
         
-        public BaseFire(Player player, string texturePath)
+        public BaseFire(IPositionable shooter, string texturePath)
         {
             // Load resources
 
             FireImage = Image.FromFile(texturePath);
 
-            X = player.X;
-            Y = player.Y;
-            CurrentDirection = player.CurrentDirection;
+            X = shooter.X;
+            Y = shooter.Y;
+            CurrentDirection = shooter.Direction;
         }
 
         protected abstract int FireSize { get; }

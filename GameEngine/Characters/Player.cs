@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Characters
 {
-    public class Player : IPhysicalSprite, ICollidable
+    public class Player : IPhysicalSprite, ICollidable, IPositionable
     {
         public const int PlayerSize = 64;
         public readonly string Nickname;
@@ -22,7 +22,10 @@ namespace GameEngine.Characters
         public Direction CurrentDirection = Direction.Right;
         public int Height => PlayerSize;
         public int Width => PlayerSize;
-        
+
+       
+       
+
         // Resources
 
         private Image _playerImage;
@@ -32,7 +35,7 @@ namespace GameEngine.Characters
         public Player(string nickname)
         {
             Nickname = nickname;
-            _xp = 50;
+            _xp = 100;//70;
 
             // Load resources
 
@@ -56,19 +59,18 @@ namespace GameEngine.Characters
             Pen blackPen = new Pen(Color.Black, 1);
             if (_xp > 0)
             {
-                g.DrawRectangle(blackPen, X + 15, bounds.Bottom - Y - Height - 15, 50, 10);
+                g.DrawRectangle(blackPen, X /*+ 15*/, bounds.Bottom - Y - Height - 15, 70, 10);
             }
 
             SolidBrush redBrush = new SolidBrush(Color.Green);
             int widthXP = _xp;
-            //string name = Nickname;
-
-            if (_xp < 50)
+            
+            if (_xp < 70)
             {
                 widthXP -= 5;
             }
 
-            g.FillRectangle(redBrush, X + 15, bounds.Bottom - Y - Height - 15, widthXP, 10);
+            g.FillRectangle(redBrush, X/* + 15*/, bounds.Bottom - Y - Height - 15, widthXP, 10);
 
             //NickName
 
@@ -126,6 +128,20 @@ namespace GameEngine.Characters
                 _xp -= 8;
             }
 
+            else if (collider is Bomb)
+            {
+                _xp -= 13;
+            }
+
+            else if (collider is Laser)
+            {
+                _xp -= 18;
+            }
+            else if (collider is Dino)
+            {
+                _xp -= 1;
+            }
+            
             if (_xp <= 0)
             {
                 MessageBus.Instantce.Publish(new PlayerDiedMessage(this));
@@ -134,8 +150,11 @@ namespace GameEngine.Characters
 
         public bool CanCollide(ICollider collider)
         {
-            return collider is Bullet;
+            return collider is Bullet || collider is Bomb || collider is Laser || collider is Dino;
         }
+
+        Direction IPositionable.Direction { get => CurrentDirection; }
+
     }
-    
+               
 }

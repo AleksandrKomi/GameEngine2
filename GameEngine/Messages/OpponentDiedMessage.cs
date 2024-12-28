@@ -1,4 +1,5 @@
 ﻿using GameEngine.Characters;
+using GameEngine.Interfeces;
 using Redbus.Events;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,11 @@ namespace GameEngine.Messages
     public class OpponentDiedMessage : EventBase
     {
         // Nothing here
-        public OpponentDiedMessage(Opponent opponent)
+        public OpponentDiedMessage(ISprite opponent)
         {
            Opponent = opponent;
         }
 
-        public Opponent Opponent { get; }
+        public ISprite Opponent { get; }
     }
 }

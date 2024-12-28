@@ -15,11 +15,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Characters\BossOpponent.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\player.png" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Leaf.xNet" Version="5.2.10" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Redbus" Version="1.0.8" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
   </ItemGroup>

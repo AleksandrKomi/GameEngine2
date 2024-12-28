@@ -3,6 +3,7 @@ using GameEngine.Decorations;
 using GameEngine.Extensions;
 using GameEngine.Interfeces;
 using GameEngine.Messages;
+using GameEngine.Primitives.Enums;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -82,11 +83,10 @@ namespace GameEngine
             //_sprites.Add(player);
             _sprites.Add(_player);
             //_player._xp = 50;
-            ISprite opponent = new Opponent(50, _counter, _player);
+            ISprite opponent = new Opponent(50);
             _sprites.Add(opponent);
             _sprites.Add(_land);
             _sprites.Add(_counter);
-            
 
         }
 
@@ -238,10 +238,30 @@ namespace GameEngine
 
             if (shoot < 4)
             {
-                Bullet bullet = new Bullet(message.Opponent, _player);
-                _sprites.Add(bullet);
+                if (message.Opponent is Boss)
+                {
+                    Bomb bomb = new Bomb(message.Opponent, _player);
+                    _sprites.Add(bomb);
+                }
+                else if (message.Opponent is RobotOpponent)
+                {
+                    if (shoot < 7)
+                    {
+                        Laser laser = new Laser(message.Opponent, _player);
+                        _sprites.Add(laser);
+                    }
+                }
+                else if (message.Opponent is Opponent)
+                {
+                    Bullet bullet = new Bullet(message.Opponent, _player);
+                    _sprites.Add(bullet);
+                }
             }
-            // System.Diagnostics.Debug.WriteLine("player received damage");  
+            if (message.Opponent is Dino)
+            {
+                
+            }    
+                        
         }
 
         private void OpponentDiedMessageHandler(OpponentDiedMessage message)
@@ -251,10 +271,29 @@ namespace GameEngine
             _sprites.Remove(message.Opponent);
 
             _counter.Count++;
-            
-            ISprite opponent = new Opponent(50, _counter, _player);
-            _sprites.Add(opponent);
 
+            ISprite opponent;
+
+            if (_counter.Count % 5 == 0 && _counter.Count > 0)
+            {
+                opponent = new Boss(100);
+                _player._xp = _player._xp + 30;
+            }
+            else if (_counter.Count % 3 == 0 && _counter.Count > 0)
+            {
+                opponent = new RobotOpponent(90);
+            }
+            else if (_player._xp >= 80)
+            {
+                opponent = new Dino(50);
+               
+            }
+            else
+            {
+                opponent = new Opponent(50);
+            }
+            
+            _sprites.Add(opponent);
         }
 
         private async void PlayerDiedMessageHandler(PlayerDiedMessage message)
@@ -275,7 +314,6 @@ namespace GameEngine
             // _sprites.Remove(_counter);
 
         }
-
         
         #region Timers
 

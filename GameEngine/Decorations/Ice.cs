@@ -12,8 +12,8 @@ namespace GameEngine.Decorations
     public class Ice : BaseFire
     {
 
-        public Ice(Player player) : base(player, 
-           texturePath: player.CurrentDirection == Direction.Right ? "Resources/Ice.png" : "Resources/IceLeft.png") 
+        public Ice(IPositionable shooter) : base(shooter, 
+           texturePath: shooter.Direction == Direction.Right ? "Resources/Ice.png" : "Resources/IceLeft.png") 
         {
             // Nothing here              
         }

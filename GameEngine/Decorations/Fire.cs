@@ -14,7 +14,7 @@ namespace GameEngine.Decorations
 {
     public class Fire : BaseFire
     {
-        public Fire(Player player) : base(player, "Resources/fire.png")
+        public Fire(IPositionable shooter) : base(shooter, "Resources/fire.png")
         {
             // Nothing here
         }

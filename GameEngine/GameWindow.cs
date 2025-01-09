@@ -4,9 +4,11 @@ using GameEngine.Extensions;
 using GameEngine.Interfeces;
 using GameEngine.Messages;
 using GameEngine.Primitives.Enums;
+using NAudio.Wave;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Resources;
 using System.Security.Cryptography.X509Certificates;
 
 namespace GameEngine
@@ -25,7 +27,7 @@ namespace GameEngine
         private readonly List<ISprite> _sprites;
         private bool _showCollizionFrame = false;
         private DateTime lastShot = DateTime.MinValue;
-
+        private readonly WaveOutEvent _outputDevice;
 
 
         // Construcor
@@ -39,6 +41,9 @@ namespace GameEngine
             _sprites = new List<ISprite>();
 
             CreateWorld();
+
+            _outputDevice = new WaveOutEvent();
+
 
             //_player = new Player("Stiv");
             /*ISprite opponent = new Opponent(50, _counter, _player);
@@ -67,8 +72,9 @@ namespace GameEngine
 
         public void CreateWorld()
         {
+            
             _sprites.Clear();
-            // _counter.Count = 0;
+            
             var enterNameWindow = new EnterNameWindow();
             DialogResult result =  enterNameWindow.ShowDialog();
 
@@ -76,6 +82,7 @@ namespace GameEngine
                 ? enterNameWindow.PlayerName
                 : "Stiv";
 
+            PlaySound("Resources/start2.mp3");
             _player = new Player(playerName);
             _counter = new Counter();
             _land = new Land();
@@ -88,6 +95,7 @@ namespace GameEngine
             _sprites.Add(_land);
             _sprites.Add(_counter);
 
+            PlaySound("Resources/fon.mp3");
         }
 
         // Methods
@@ -107,12 +115,15 @@ namespace GameEngine
             else if (e.KeyCode == Keys.Up)
             {
                 _player.MoveUp();
+
+                PlaySound("Resources/jump1.mp3");
             }
             else if (e.KeyCode == Keys.Down)
             {
                 if (DateTime.Now - lastShot > TimeSpan.FromSeconds(2) && _player._xp > 0)
                 {
                     Fire fire = new Fire(_player);
+                    PlaySound("Resources/shot.mp3");
                     _sprites.Add(fire);
                     lastShot = DateTime.Now;
                 }
@@ -122,6 +133,7 @@ namespace GameEngine
                 if (DateTime.Now - lastShot > TimeSpan.FromSeconds(1) && _player._xp > 0)
                 {
                     Ice ice = new Ice(_player);
+                    PlaySound("Resources/shot.mp3");
                     _sprites.Add(ice);
                     lastShot = DateTime.Now;
                 }
@@ -175,7 +187,11 @@ namespace GameEngine
                                     _sprites.Remove(sprite);
 
                                 collidableSprite.OnCollision(colliderSprite);
+
+                                PlaySound("Resources/hit.mp3");
+
                                 System.Diagnostics.Debug.WriteLine("hit");
+
                             }
 
                         }
@@ -229,6 +245,16 @@ namespace GameEngine
 
         }
 
+        private void PlaySound(string fileName)
+        {
+            var outputDevice = new WaveOutEvent();
+            var audioFile = new AudioFileReader(fileName);
+
+            outputDevice.Init(audioFile);
+            outputDevice.Play();
+            
+        }
+
         // Handlers
 
         private void OpponentShootsMessageHandler(OpponentShootsMessage message)
@@ -247,6 +273,8 @@ namespace GameEngine
                 {
                     if (shoot < 7)
                     {
+                        PlaySound("Resources/laser.mp3");
+
                         Laser laser = new Laser(message.Opponent, _player);
                         _sprites.Add(laser);
                     }
@@ -254,19 +282,21 @@ namespace GameEngine
                 else if (message.Opponent is Opponent)
                 {
                     Bullet bullet = new Bullet(message.Opponent, _player);
+
+                    PlaySound("Resources/bullet.mp3");
+
                     _sprites.Add(bullet);
                 }
             }
-            if (message.Opponent is Dino)
-            {
-                
-            }    
+               
                         
         }
 
         private void OpponentDiedMessageHandler(OpponentDiedMessage message)
         {
             // TODO: добавить обработку смерти оппонента
+
+            PlaySound("Resources/frag.mp3");
 
             _sprites.Remove(message.Opponent);
 
@@ -278,15 +308,16 @@ namespace GameEngine
             {
                 opponent = new Boss(100);
                 _player._xp = _player._xp + 30;
+
+                PlaySound("Resources/xp.mp3");
             }
             else if (_counter.Count % 3 == 0 && _counter.Count > 0)
             {
-                opponent = new RobotOpponent(90);
+                opponent = new RobotOpponent(75);
             }
             else if (_player._xp >= 80)
             {
                 opponent = new Dino(50);
-               
             }
             else
             {
@@ -298,6 +329,7 @@ namespace GameEngine
 
         private async void PlayerDiedMessageHandler(PlayerDiedMessage message)
         {
+            PlaySound("Resources/game-over.mp3");
             _sprites.Remove(message.Player);
             System.Diagnostics.Debug.WriteLine($"Game Over, Ваш результат: {_counter.Count}");
                        
@@ -305,14 +337,12 @@ namespace GameEngine
             
             GameOver gameover = new GameOver(_counter);
             _sprites.Add(gameover);
-
+        
             // new EnterNameWindow(_counter.Count).ShowDialog();
             await LeaderAPI.PostLeader(_player.Nickname, _counter.Count);
             new LeaderBoard().ShowDialog();
                 
-
             // _sprites.Remove(_counter);
-
         }
         
         #region Timers

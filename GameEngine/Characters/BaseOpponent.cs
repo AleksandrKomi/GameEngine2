@@ -59,7 +59,7 @@ namespace GameEngine.Characters
         {
             if (collider is Fire)
             {
-                _xp -= 25;
+                _xp -= 22;
             }
             else if (collider is Ice)
             {

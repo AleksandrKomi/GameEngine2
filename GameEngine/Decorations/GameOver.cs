@@ -27,7 +27,7 @@ namespace GameEngine.Decorations
              g.DrawString("Game Over", gameoverFont, Brushes.DarkRed, 270, 250);
              g.DrawString($"Вы убили врагов: {result}", gameoverFont, Brushes.DarkGreen, 230, 300);
              g.DrawString("Hажмите Enter, чтобы начать снова.", gameoverFont, Brushes.Black, 130, 350);
-
+            
         }
 
         

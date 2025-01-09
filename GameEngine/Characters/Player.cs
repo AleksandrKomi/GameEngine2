@@ -23,9 +23,6 @@ namespace GameEngine.Characters
         public int Height => PlayerSize;
         public int Width => PlayerSize;
 
-       
-       
-
         // Resources
 
         private Image _playerImage;
@@ -35,7 +32,7 @@ namespace GameEngine.Characters
         public Player(string nickname)
         {
             Nickname = nickname;
-            _xp = 100;//70;
+            _xp = 70;
 
             // Load resources
 
@@ -59,7 +56,7 @@ namespace GameEngine.Characters
             Pen blackPen = new Pen(Color.Black, 1);
             if (_xp > 0)
             {
-                g.DrawRectangle(blackPen, X /*+ 15*/, bounds.Bottom - Y - Height - 15, 70, 10);
+                g.DrawRectangle(blackPen, X, bounds.Bottom - Y - Height - 15, 70, 10);
             }
 
             SolidBrush redBrush = new SolidBrush(Color.Green);
@@ -70,7 +67,7 @@ namespace GameEngine.Characters
                 widthXP -= 5;
             }
 
-            g.FillRectangle(redBrush, X/* + 15*/, bounds.Bottom - Y - Height - 15, widthXP, 10);
+            g.FillRectangle(redBrush, X, bounds.Bottom - Y - Height - 15, widthXP, 10);
 
             //NickName
 
@@ -130,7 +127,7 @@ namespace GameEngine.Characters
 
             else if (collider is Bomb)
             {
-                _xp -= 13;
+                _xp -= 14;
             }
 
             else if (collider is Laser)
@@ -139,7 +136,7 @@ namespace GameEngine.Characters
             }
             else if (collider is Dino)
             {
-                _xp -= 1;
+                _xp -= 2;
             }
             
             if (_xp <= 0)

@@ -52,11 +52,11 @@ namespace GameEngine.Characters
             {
                 _currentDirectionOpponentImage = OpponentLeftImage;
 
-                X -= 2;
+                X -= 4;
             }
             else if (CurrentDirection == Direction.Right)
             {
-                X += 2;
+                X += 4;
                 _currentDirectionOpponentImage = OpponentImage;
             }
         }
@@ -64,7 +64,7 @@ namespace GameEngine.Characters
         {
             if (collider is Fire)
             {
-                _xp -= 25;
+                _xp -= 22;
             }
             else if (collider is Ice)
             {

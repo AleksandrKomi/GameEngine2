@@ -65,6 +65,5 @@ namespace GameEngine.Characters
             }
         }
 
-
     }
 }

@@ -46,11 +46,11 @@ namespace GameEngine.Decorations
                 X += 4;             
             }
 
-            if (_shooter.Y < _target.Y)
+            if (Y < _target.Y)
             {
                 Y += 1;
             }
-            else if (_shooter.Y > _target.Y)
+            else if (Y > _target.Y)
             {
                 Y -= 1;
             }

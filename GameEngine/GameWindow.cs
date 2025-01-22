@@ -4,12 +4,17 @@ using GameEngine.Extensions;
 using GameEngine.Interfeces;
 using GameEngine.Messages;
 using GameEngine.Primitives.Enums;
-using NAudio.Wave;
+//using NAudio.Wave;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Resources;
 using System.Security.Cryptography.X509Certificates;
+//using NAudio;
+using System.Threading;
+using System.Security.Policy;
+using System.Drawing.Text;
+
 
 namespace GameEngine
 {
@@ -21,14 +26,28 @@ namespace GameEngine
         private int _framesCount;
         private int _fps;
         public /*readonly*/ Counter _counter; 
-        private readonly GameOver _gameover;
+        private /*readonly*/ GameOver _gameover;
         private /*readonly*/ Player _player;
         private /*readonly*/ Land _land;
+        private FonSky _fonSky;
         private readonly List<ISprite> _sprites;
         private bool _showCollizionFrame = false;
         private DateTime lastShot = DateTime.MinValue;
-        private readonly WaveOutEvent _outputDevice;
-
+        //private readonly WaveOutEvent _outputDevice;
+        private readonly Dictionary<string, MemoryStream> _cachedAudio;
+        private readonly AudioPlaybackEngine _audioPlaybackEngine;
+        private readonly CachedSound _shootCachedSound;
+        private readonly CachedSound _jumpCachedSound;
+        private readonly CachedSound _startCachedSound;
+        private readonly CachedSound _hitCachedSound;
+        private readonly CachedSound _bulletCachedSound;
+        private readonly CachedSound _laserCachedSound;
+        private readonly CachedSound _fragCachedSound;
+        private readonly CachedSound _xpCachedSound;
+        private readonly CachedSound _dinoCachedSound;
+        private readonly CachedSound _gameoverCachedSound;
+        //private readonly CachedSound _fonCachedSound;
+        private LoopStream _fonLoopStream;
 
         // Construcor
 
@@ -40,22 +59,24 @@ namespace GameEngine
             _physicsUpdateTimer.Elapsed += _physicsUpdateTimer_Elapsed;
             _sprites = new List<ISprite>();
 
+            _cachedAudio = new Dictionary<string, MemoryStream>();
+            _audioPlaybackEngine = new AudioPlaybackEngine();
+            
+            _shootCachedSound = new CachedSound("Resources/shot.mp3");
+            _jumpCachedSound = new CachedSound("Resources/jump1.mp3");
+            _startCachedSound = new CachedSound("Resources/start.mp3");
+            _hitCachedSound = new CachedSound("Resources/hit.mp3");
+            _bulletCachedSound = new CachedSound("Resources/bullet.mp3");
+            _laserCachedSound = new CachedSound("Resources/laser.mp3");
+            _fragCachedSound = new CachedSound("Resources/frag.mp3");
+            _xpCachedSound = new CachedSound("Resources/xp.mp3");
+            _dinoCachedSound = new CachedSound("Resources/dino.mp3");
+            _gameoverCachedSound = new CachedSound("Resources/gameover.mp3");
+
             CreateWorld();
 
-            _outputDevice = new WaveOutEvent();
-
-
-            //_player = new Player("Stiv");
-            /*ISprite opponent = new Opponent(50, _counter, _player);
-            _land = new Land();
-            _counter = new Counter();
-
-            _sprites.Add(_player);
-            _sprites.Add(opponent);
-            _sprites.Add(_land);
-            _sprites.Add(_counter);*/
-
-            //opponent.WriteDebugInfo(true);
+           // _fonLoopStream = new LoopStream("Resources/fon.mp3");
+           // _audioPlaybackEngine.PlayLoopSound(_fonLoopStream);
 
             // Start timers
 
@@ -69,10 +90,10 @@ namespace GameEngine
             MessageBus.Instantce.Subscribe<PlayerDiedMessage>(PlayerDiedMessageHandler);
             MessageBus.Instantce.Subscribe<OpponentShootsMessage>(OpponentShootsMessageHandler);
         }
-
+         
+        
         public void CreateWorld()
         {
-            
             _sprites.Clear();
             
             var enterNameWindow = new EnterNameWindow();
@@ -82,20 +103,18 @@ namespace GameEngine
                 ? enterNameWindow.PlayerName
                 : "Stiv";
 
-            PlaySound("Resources/start2.mp3");
+            _fonSky = new FonSky();
+            _sprites.Add(_fonSky);
+            _audioPlaybackEngine.PlaySound(_startCachedSound);
             _player = new Player(playerName);
             _counter = new Counter();
             _land = new Land();
-
-            //_sprites.Add(player);
             _sprites.Add(_player);
-            //_player._xp = 50;
             ISprite opponent = new Opponent(50);
             _sprites.Add(opponent);
             _sprites.Add(_land);
             _sprites.Add(_counter);
-
-            PlaySound("Resources/fon.mp3");
+            _isOver = false;
         }
 
         // Methods
@@ -103,7 +122,8 @@ namespace GameEngine
         public void GameWindow_KeyDown(object sender, KeyEventArgs e)
         {
             Player player = _player;
-                       
+            bool _music = true;
+
             if (e.KeyCode == Keys.Left)
             {
                 _player.MoveLeft();
@@ -116,14 +136,14 @@ namespace GameEngine
             {
                 _player.MoveUp();
 
-                PlaySound("Resources/jump1.mp3");
+                _audioPlaybackEngine.PlaySound(_jumpCachedSound);
             }
             else if (e.KeyCode == Keys.Down)
             {
                 if (DateTime.Now - lastShot > TimeSpan.FromSeconds(2) && _player._xp > 0)
                 {
                     Fire fire = new Fire(_player);
-                    PlaySound("Resources/shot.mp3");
+                    _audioPlaybackEngine.PlaySound(_shootCachedSound);
                     _sprites.Add(fire);
                     lastShot = DateTime.Now;
                 }
@@ -133,7 +153,7 @@ namespace GameEngine
                 if (DateTime.Now - lastShot > TimeSpan.FromSeconds(1) && _player._xp > 0)
                 {
                     Ice ice = new Ice(_player);
-                    PlaySound("Resources/shot.mp3");
+                    _audioPlaybackEngine.PlaySound(_shootCachedSound);
                     _sprites.Add(ice);
                     lastShot = DateTime.Now;
                 }
@@ -144,9 +164,24 @@ namespace GameEngine
             }
             else if (e.KeyCode == Keys.Enter)
             {
-                CreateWorld();
+                if (_isOver == true)
+                {
+                    CreateWorld();
+                    _fonLoopStream = new LoopStream("Resources/fon.mp3");
+                    _audioPlaybackEngine.PlayLoopSound(_fonLoopStream);
+                }
             }
-
+            else if (e.KeyCode == Keys.PageDown)
+            {
+                _fonLoopStream.Stop();
+                 _music = false;
+            }
+            else if (e.KeyCode == Keys.PageUp && _music == false)
+            {
+                _fonLoopStream = new LoopStream("Resources/fon.mp3");
+                _audioPlaybackEngine.PlayLoopSound(_fonLoopStream);
+                
+            }
         }
 
         private void ProcessPhysics()
@@ -188,8 +223,7 @@ namespace GameEngine
 
                                 collidableSprite.OnCollision(colliderSprite);
 
-                                PlaySound("Resources/hit.mp3");
-
+                                _audioPlaybackEngine.PlaySound(_hitCachedSound);
                                 System.Diagnostics.Debug.WriteLine("hit");
 
                             }
@@ -242,18 +276,7 @@ namespace GameEngine
             _bufferedGraphics.Render();
 
             _framesCount++;
-
-        }
-
-        private void PlaySound(string fileName)
-        {
-            var outputDevice = new WaveOutEvent();
-            var audioFile = new AudioFileReader(fileName);
-
-            outputDevice.Init(audioFile);
-            outputDevice.Play();
-            
-        }
+        }      
 
         // Handlers
 
@@ -267,14 +290,14 @@ namespace GameEngine
                 if (message.Opponent is Boss)
                 {
                     Bomb bomb = new Bomb(message.Opponent, _player);
+                    _audioPlaybackEngine.PlaySound(_bulletCachedSound);
                     _sprites.Add(bomb);
                 }
                 else if (message.Opponent is RobotOpponent)
                 {
                     if (shoot < 7)
                     {
-                        PlaySound("Resources/laser.mp3");
-
+                        _audioPlaybackEngine.PlaySound(_laserCachedSound);
                         Laser laser = new Laser(message.Opponent, _player);
                         _sprites.Add(laser);
                     }
@@ -282,22 +305,17 @@ namespace GameEngine
                 else if (message.Opponent is Opponent)
                 {
                     Bullet bullet = new Bullet(message.Opponent, _player);
-
-                    PlaySound("Resources/bullet.mp3");
-
+                    _audioPlaybackEngine.PlaySound(_bulletCachedSound);
                     _sprites.Add(bullet);
                 }
-            }
-               
-                        
+            }         
         }
 
         private void OpponentDiedMessageHandler(OpponentDiedMessage message)
         {
             // TODO: добавить обработку смерти оппонента
 
-            PlaySound("Resources/frag.mp3");
-
+            _audioPlaybackEngine.PlaySound(_fragCachedSound);
             _sprites.Remove(message.Opponent);
 
             _counter.Count++;
@@ -308,8 +326,7 @@ namespace GameEngine
             {
                 opponent = new Boss(100);
                 _player._xp = _player._xp + 30;
-
-                PlaySound("Resources/xp.mp3");
+                _audioPlaybackEngine.PlaySound(_xpCachedSound);
             }
             else if (_counter.Count % 3 == 0 && _counter.Count > 0)
             {
@@ -318,6 +335,7 @@ namespace GameEngine
             else if (_player._xp >= 80)
             {
                 opponent = new Dino(50);
+                _audioPlaybackEngine.PlaySound(_dinoCachedSound);
             }
             else
             {
@@ -327,22 +345,31 @@ namespace GameEngine
             _sprites.Add(opponent);
         }
 
+
+        bool _isOver;
+
         private async void PlayerDiedMessageHandler(PlayerDiedMessage message)
         {
-            PlaySound("Resources/game-over.mp3");
+          
+            _audioPlaybackEngine.PlaySound(_gameoverCachedSound);
+
+           // _fonLoopStream.Stop();
+
             _sprites.Remove(message.Player);
             System.Diagnostics.Debug.WriteLine($"Game Over, Ваш результат: {_counter.Count}");
-                       
+
+                    
             _sprites.Clear();
             
             GameOver gameover = new GameOver(_counter);
             _sprites.Add(gameover);
+
+            _isOver = true;
         
             // new EnterNameWindow(_counter.Count).ShowDialog();
             await LeaderAPI.PostLeader(_player.Nickname, _counter.Count);
             new LeaderBoard().ShowDialog();
-                
-            // _sprites.Remove(_counter);
+              
         }
         
         #region Timers

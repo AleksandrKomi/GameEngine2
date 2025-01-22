@@ -13,11 +13,9 @@ namespace GameEngine.Decorations
     {
         int result;
 
-
         public GameOver(Counter counter)
         {
             result = counter.Count;
-
         }
 
         public void Draw(Graphics g, Rectangle bounds)
@@ -29,8 +27,6 @@ namespace GameEngine.Decorations
              g.DrawString("Hажмите Enter, чтобы начать снова.", gameoverFont, Brushes.Black, 130, 350);
             
         }
-
-        
     }
 }    
   

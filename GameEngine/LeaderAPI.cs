@@ -1,6 +1,7 @@
 ﻿using GameEngine.DTO;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -68,6 +69,20 @@ namespace GameEngine
             string jsonContent = JsonSerializer.Serialize(dto);
 
             string? response = await HttpPost("https://localhost:7209/api/Leaderboard", jsonContent);
+        }
+
+        public static async Task PostStatistics(string name, int score)
+        {
+            var dto = new StatisticsDTO()
+            {
+               // DateTime = dateTime,
+                Name = name,
+                Score = score
+            };
+
+            string jsonContent = JsonSerializer.Serialize(dto);
+
+            string? response = await HttpPost("https://localhost:7209/api/StatisticsControllers", jsonContent);
         }
 
         public static async Task<LeaderDTO[]> GetLeaders()

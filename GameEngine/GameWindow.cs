@@ -4,13 +4,13 @@ using GameEngine.Extensions;
 using GameEngine.Interfeces;
 using GameEngine.Messages;
 using GameEngine.Primitives.Enums;
-//using NAudio.Wave;
+using NAudio.Wave;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Resources;
 using System.Security.Cryptography.X509Certificates;
-//using NAudio;
+using NAudio;
 using System.Threading;
 using System.Security.Policy;
 using System.Drawing.Text;
@@ -102,6 +102,11 @@ namespace GameEngine
             string playerName = result == DialogResult.OK
                 ? enterNameWindow.PlayerName
                 : "Stiv";
+
+            if (string.IsNullOrWhiteSpace(playerName))
+            {
+                playerName = "Stiv";
+            }
 
             _fonSky = new FonSky();
             _sprites.Add(_fonSky);
@@ -345,7 +350,6 @@ namespace GameEngine
             _sprites.Add(opponent);
         }
 
-
         bool _isOver;
 
         private async void PlayerDiedMessageHandler(PlayerDiedMessage message)
@@ -369,6 +373,7 @@ namespace GameEngine
             // new EnterNameWindow(_counter.Count).ShowDialog();
             await LeaderAPI.PostLeader(_player.Nickname, _counter.Count);
             new LeaderBoard().ShowDialog();
+            await LeaderAPI.PostStatistics(_player.Nickname, _counter.Count);
               
         }
         

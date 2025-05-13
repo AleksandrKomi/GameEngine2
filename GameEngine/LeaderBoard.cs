@@ -19,8 +19,6 @@ namespace GameEngine
 
         }
 
-       
-
         private async void LeaderBoard_Load(object sender, EventArgs e)
         {
           
@@ -28,8 +26,6 @@ namespace GameEngine
 
             LeadersList.Items.AddRange(leaders.Select(l => $"{l.Name} - {l.Score}").ToArray());
 
-
-            
         }
     }
 }

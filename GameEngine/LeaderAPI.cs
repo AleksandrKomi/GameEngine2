@@ -99,9 +99,7 @@ namespace GameEngine
             }
 
             return Array.Empty<LeaderDTO>();
-
         }
     }
-
 
 }

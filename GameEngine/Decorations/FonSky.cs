@@ -1,4 +1,5 @@
-﻿using GameEngine.Interfeces;
+﻿using GameEngine.DTO;
+using GameEngine.Interfeces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,9 @@ namespace GameEngine.Decorations
 
         private readonly Image _fonSkyImage;
 
-        public FonSky()
+        public  FonSky(string weather)   
         {
-            _fonSkyImage = Image.FromFile("Resources/fon.png");
+            _fonSkyImage = Image.FromFile($"Resources/{weather}fon.png");
         }
 
         public void Draw(Graphics g, Rectangle bounds)

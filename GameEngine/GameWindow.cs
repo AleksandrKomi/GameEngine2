@@ -14,6 +14,7 @@ using NAudio;
 using System.Threading;
 using System.Security.Policy;
 using System.Drawing.Text;
+using GameEngine.DTO;
 
 
 namespace GameEngine
@@ -73,7 +74,8 @@ namespace GameEngine
             _dinoCachedSound = new CachedSound("Resources/dino.mp3");
             _gameoverCachedSound = new CachedSound("Resources/gameover.mp3");
 
-            CreateWorld();
+
+            CreateWorld().Wait();
 
            // _fonLoopStream = new LoopStream("Resources/fon.mp3");
            // _audioPlaybackEngine.PlayLoopSound(_fonLoopStream);
@@ -92,7 +94,7 @@ namespace GameEngine
         }
          
         
-        public void CreateWorld()
+        public async Task CreateWorld()
         {
             _sprites.Clear();
             
@@ -108,7 +110,25 @@ namespace GameEngine
                 playerName = "Stiv";
             }
 
-            _fonSky = new FonSky();
+            var enterCityWindow = new EnterCityWindow();
+            DialogResult dialogResult = enterCityWindow.ShowDialog();
+
+            string cityName = dialogResult == DialogResult.OK
+                ? enterCityWindow.NameCity ?? string.Empty
+                : "Сыктывкар";
+
+            if (string.IsNullOrWhiteSpace(cityName))
+            {
+                cityName = "Сыктывкар";
+            }
+
+            WeatherDTO? weather = await GeoAPI.GetLocationWeather(cityName);
+            if (weather != null)
+            {
+                MessageBox.Show(weather.Weather.FirstOrDefault()?.Main);
+            }
+
+            _fonSky = new FonSky(weather.Weather.FirstOrDefault()?.Main);
             _sprites.Add(_fonSky);
             _audioPlaybackEngine.PlaySound(_startCachedSound);
             _player = new Player(playerName);
@@ -120,11 +140,17 @@ namespace GameEngine
             _sprites.Add(_land);
             _sprites.Add(_counter);
             _isOver = false;
+            
+
+            /*Graphics graphics = _bufferedGraphics.Graphics;
+            Font battle = new Font("Ariel", 16);
+            graphics.DrawString($"Битва за город: {cityName}", battle, Brushes.Red, DisplayRectangle.Right - 150, 10);*/
+
         }
 
         // Methods
 
-        public void GameWindow_KeyDown(object sender, KeyEventArgs e)
+        public async void GameWindow_KeyDown(object sender, KeyEventArgs e)
         {
             Player player = _player;
             bool _music = true;
@@ -171,7 +197,7 @@ namespace GameEngine
             {
                 if (_isOver == true)
                 {
-                    CreateWorld();
+                    await CreateWorld();
                     _fonLoopStream = new LoopStream("Resources/fon.mp3");
                     _audioPlaybackEngine.PlayLoopSound(_fonLoopStream);
                 }
@@ -354,14 +380,12 @@ namespace GameEngine
 
         private async void PlayerDiedMessageHandler(PlayerDiedMessage message)
         {
-          
             _audioPlaybackEngine.PlaySound(_gameoverCachedSound);
 
            // _fonLoopStream.Stop();
 
             _sprites.Remove(message.Player);
             System.Diagnostics.Debug.WriteLine($"Game Over, Ваш результат: {_counter.Count}");
-
                     
             _sprites.Clear();
             
@@ -374,9 +398,20 @@ namespace GameEngine
             await LeaderAPI.PostLeader(_player.Nickname, _counter.Count);
             new LeaderBoard().ShowDialog();
             await LeaderAPI.PostStatistics(_player.Nickname, _counter.Count);
-              
+
+            // вызов ачивок
+
+            var achievements = await AchievementAPI.GetAchievement(_player.Nickname);
+
+            foreach (var a in achievements)
+            {
+                var b = a.Text;
+
+                MessageBox.Show(b, "Достижения");
+            }
+            
         }
-        
+
         #region Timers
 
         private void UpdateScreenTimer_Tick(object sender, EventArgs e)

@@ -63,7 +63,8 @@ namespace GameEngine.Characters
             }
             else if (collider is Ice)
             {
-                _xp -= 13;
+                //_xp -= 13;
+                _xp -= 50;
             }
 
             if (_xp > 0)

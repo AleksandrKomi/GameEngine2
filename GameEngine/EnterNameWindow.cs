@@ -13,7 +13,7 @@ namespace GameEngine
 {
     public partial class EnterNameWindow : Form
     {
-        public string PlayerName { get; private set; }
+        public string PlayerName { get; private set; }  
 
 
         public EnterNameWindow()
